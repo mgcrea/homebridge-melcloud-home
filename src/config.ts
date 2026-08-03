@@ -12,6 +12,7 @@ export type MelCloudHomeConfig = {
   writeDebounceMs: number;
   useWebSocket: boolean;
   exposeFanService: boolean;
+  exposeVaneControl: boolean;
   exposeTemperatureSensors: boolean;
   exposeDrySwitch: boolean;
   exposeFanSwitch: boolean;
@@ -60,6 +61,11 @@ export const parseConfig = (config: PlatformConfig): MelCloudHomeConfig => {
     // same control as the Heater Cooler rather than appearing separately,
     // because the Heater Cooler is marked the primary service.
     exposeFanService: boolean(config["exposeFanService"], true),
+    // Slats is HAP's louver service and carries a tilt angle, which is the only
+    // native way to pick a fixed vane position rather than just swing on/off.
+    // Apple's Home app has never shipped UI for it, so it may only be visible
+    // in Eve and similar; it costs nothing when unrendered.
+    exposeVaneControl: boolean(config["exposeVaneControl"], true),
     // The Heater Cooler already reports room temperature, so a separate sensor
     // is a duplicate reading. Opt in when a distinct sensor is wanted for
     // automations or history.

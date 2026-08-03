@@ -82,6 +82,7 @@ Add a platform block to `config.json`, or use the Homebridge UI form:
 | `pollInterval` | `60` | Seconds between polls. Clamped to a 30 second minimum. |
 | `useWebSocket` | `true` | Subscribe to real-time push updates. |
 | `exposeFanService` | `true` | Fan speed, auto and swing. The only native way to reach them; folds into the same control. |
+| `exposeVaneControl` | `true` | Vane position as a tilt angle. Apple's Home app may not render it — see Limitations. |
 | `exposeTemperatureSensors` | `false` | Separate temperature sensor per unit. Duplicates the climate reading, but carries fault/connectivity status. |
 | `exposeDrySwitch` | `false` | Switch for dry mode, on units that support it. Extra control. |
 | `exposeFanSwitch` | `false` | Switch for fan-only mode. Extra control. |
@@ -109,6 +110,8 @@ Tokens are refreshed automatically about a minute before they expire.
 | Fan AUTO toggle | `SetFanSpeed` of `Auto` |
 | Current fan state | `ActualFanSpeed` — `Off` or standby reads as idle |
 | Swing mode | vertical vane `Swing` |
+| Target / current tilt angle | vertical vane `One`–`Five`, spread across -90…90° |
+| Current slat state | swinging vs. fixed |
 | Status fault / active | `IsInError` / `isConnected` — on the temperature sensor only, since HeaterCooler does not carry these characteristics |
 
 Dry and Fan report as *Cool* on the main control — they never heat — with the dedicated
@@ -188,6 +191,12 @@ it here too, or publishes will start failing authentication.
 - Air-to-water units (Ecodan heat pumps) are recognised in the API but not yet exposed.
 - Horizontal vane position is read but not individually controllable from HomeKit, which
   has no characteristic for it.
+- Vertical vane position is exposed through HAP's `Slats` service as a tilt angle, which is
+  the only native representation of a louver. Apple's Home app has never shipped UI for that
+  service, so in practice it may only be reachable from Eve and similar apps. It is inert
+  rather than broken when unrendered; set `exposeVaneControl: false` to drop it. HomeKit has
+  no general-purpose selector characteristic, so a labelled list of vane positions is not
+  possible without presenting the unit as a television.
 - Energy telemetry is **not implemented**. The `exposeEnergy` option is accepted and the
   endpoint is known, but the response shape has never been captured, so there is nothing
   to parse yet. Enabling the option logs a warning and changes nothing. Units reporting

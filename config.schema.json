@@ -46,6 +46,12 @@
         "default": true,
         "description": "Adds fan speed, automatic fan speed and swing to each unit. The Home app does not render these on a Heater Cooler, so without this they cannot be reached natively. It folds into the same control as the climate one rather than appearing separately. Turning it on makes the separate automatic-fan-speed switch redundant."
       },
+      "exposeVaneControl": {
+        "title": "Expose vane position control",
+        "type": "boolean",
+        "default": true,
+        "description": "Adds a Slats (louver) service per unit with a tilt angle, so a fixed vane position can be chosen instead of only swing on/off. Apple's Home app has never shipped UI for this service, so it may only appear in Eve and similar apps; it is inert rather than broken when not rendered."
+      },
       "exposeTemperatureSensors": {
         "title": "Expose temperature sensors",
         "type": "boolean",
