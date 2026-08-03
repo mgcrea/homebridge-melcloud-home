@@ -185,32 +185,36 @@ export const isSwinging = (state: UnitState): number =>
 /** Fixed vertical vane positions, lowest-to-highest as the unit numbers them. */
 const VANE_POSITIONS = ["One", "Two", "Three", "Four", "Five"] as const;
 
-/** Degrees between adjacent positions across the -90..90 tilt range. */
-const VANE_ANGLE_STEP = 180 / (VANE_POSITIONS.length - 1);
+/** Slider spacing so each position lands on a stop the slider can reach. */
+export const VANE_POSITION_STEP = 100 / VANE_POSITIONS.length;
 
 /**
- * HomeKit describes a louver as a tilt angle from -90 to 90 degrees; the unit
- * has five discrete positions. Spread them evenly so each position lands on an
- * exact angle rather than somewhere the slider cannot reach.
+ * Vane position, carried on a fan speed slider.
  *
- * `Auto` and `Swing` are not positions and have no angle — they are carried by
- * SwingMode and CurrentSlatState instead.
+ * HAP's `Slats` service models a louver properly, as a tilt angle — but Apple's
+ * Home app has never drawn it, so it is unreachable where it matters. A fan's
+ * RotationSpeed does render, so the five positions ride on that instead. It is
+ * a deliberate fudge: the "speed" is really an angle.
+ *
+ * `Auto` and `Swing` are not positions and report 0 — they are carried by
+ * TargetFanState and SwingMode.
  */
-export const vanePositionToAngle = (
-  vane: VaneVerticalDirection | undefined,
-): number | undefined => {
+export const vanePositionToPercent = (vane: VaneVerticalDirection | undefined): number => {
   const index = VANE_POSITIONS.indexOf(vane as (typeof VANE_POSITIONS)[number]);
-  return index < 0 ? undefined : -90 + index * VANE_ANGLE_STEP;
+  return index < 0 ? 0 : Math.round(((index + 1) / VANE_POSITIONS.length) * 100);
 };
 
-export const angleToVanePosition = (angle: number): VaneVerticalDirection => {
-  const index = Math.round((angle + 90) / VANE_ANGLE_STEP);
-  const clamped = Math.min(VANE_POSITIONS.length - 1, Math.max(0, index));
-  return VANE_POSITIONS[clamped] as VaneVerticalDirection;
+export const percentToVanePosition = (percent: number): VaneVerticalDirection | undefined => {
+  if (percent <= 0) {
+    return undefined;
+  }
+  const index = Math.min(
+    VANE_POSITIONS.length,
+    Math.max(1, Math.round((percent / 100) * VANE_POSITIONS.length)),
+  );
+  return VANE_POSITIONS[index - 1] as VaneVerticalDirection;
 };
 
-/** `Characteristic.CurrentSlatState` */
-export const CurrentSlatState = { FIXED: 0, JAMMED: 1, SWINGING: 2 } as const;
-
-export const toCurrentSlatState = (state: UnitState): number =>
-  isSwinging(state) === SwingMode.ENABLED ? CurrentSlatState.SWINGING : CurrentSlatState.FIXED;
+/** Automatic vane position maps onto the fan's AUTO/MANUAL toggle. */
+export const toVaneTargetFanState = (vane: VaneVerticalDirection | undefined): number =>
+  vane === "Auto" ? TargetFanState.AUTO : TargetFanState.MANUAL;

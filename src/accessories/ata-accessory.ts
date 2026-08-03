@@ -8,7 +8,6 @@ import { WriteCoalescer } from "../util/coalesce.js";
 import {
   CurrentState,
   SwingMode,
-  angleToVanePosition,
   TargetFanState,
   TargetState,
   fanSpeedStep,
@@ -20,11 +19,13 @@ import {
   temperatureRangeFor,
   temperatureStep,
   toCurrentFanState,
-  toCurrentSlatState,
   toCurrentState,
   toTargetFanState,
   toTargetState,
-  vanePositionToAngle,
+  VANE_POSITION_STEP,
+  percentToVanePosition,
+  toVaneTargetFanState,
+  vanePositionToPercent,
 } from "../util/mapping.js";
 
 /**
@@ -94,7 +95,7 @@ export class AtaAccessory {
     this.#vane = this.#optionalService(
       platform.options.exposeVaneControl &&
         (unit.capabilities.hasAirDirection || unit.capabilities.hasSwing),
-      Service.Slats,
+      Service.Fanv2,
       `${unit.givenDisplayName} Vane`,
       "vane",
     );
@@ -138,11 +139,7 @@ export class AtaAccessory {
   /** Add or remove an optional service depending on config and capabilities. */
   #optionalService(
     enabled: boolean,
-    type:
-      | typeof Service.Switch
-      | typeof Service.TemperatureSensor
-      | typeof Service.Fanv2
-      | typeof Service.Slats,
+    type: typeof Service.Switch | typeof Service.TemperatureSensor | typeof Service.Fanv2,
     name: string,
     subtype: string,
   ): Service | undefined {
@@ -351,12 +348,16 @@ export class AtaAccessory {
   }
 
   /**
-   * Vane position, as a Slats service.
+   * Vane position, as a second Fan service.
    *
-   * SwingMode alone can only say "swinging or not"; Slats adds a tilt angle,
-   * which is the only native way to ask for a fixed vane position. Note Apple's
-   * Home app has never shipped UI for this service, so it may only be reachable
-   * from Eve and similar — it is inert rather than broken when unrendered.
+   * HAP models a louver properly with `Slats` and a tilt angle, but Apple's
+   * Home app has never drawn that service, so it is unreachable where it
+   * matters. A fan's RotationSpeed does render, so the five vane positions ride
+   * on a second Fan whose speed slider is really an angle. A deliberate fudge,
+   * and the only mapping that is both native and visible.
+   *
+   * The whole vane vocabulary fits: AUTO/MANUAL carries automatic positioning,
+   * the slider carries the five fixed positions, and SwingMode carries swing.
    */
   #configureVane(): void {
     const service = this.#vane;
@@ -365,33 +366,55 @@ export class AtaAccessory {
     }
     const { Characteristic } = this.platform;
 
-    // The louvers themselves lie horizontally; tilting them aims the air up or
-    // down, which is what the unit calls the vertical direction.
-    service.setCharacteristic(Characteristic.SlatType, Characteristic.SlatType.HORIZONTAL);
+    service
+      .getCharacteristic(Characteristic.Active)
+      .onGet(() => (this.#state.power ? 1 : 0))
+      .onSet((value) => {
+        const power = value === 1;
+        this.#state = { ...this.#state, power };
+        this.#writer.submit({ power, operationMode: this.#state.operationMode ?? "Automatic" });
+        this.#heaterCooler.updateCharacteristic(Characteristic.Active, power ? 1 : 0);
+        this.#fan?.updateCharacteristic(Characteristic.Active, power ? 1 : 0);
+      });
 
     service
-      .getCharacteristic(Characteristic.CurrentSlatState)
-      .onGet(() => toCurrentSlatState(this.#state));
+      .getCharacteristic(Characteristic.CurrentFanState)
+      .onGet(() => toCurrentFanState(this.#state));
+
+    service
+      .getCharacteristic(Characteristic.TargetFanState)
+      .onGet(() => toVaneTargetFanState(this.#state.vaneVerticalDirection))
+      .onSet((value) => {
+        // Leaving AUTO has to name a real position; the remembered one is
+        // "Auto" by definition, so fall back to the middle of the range.
+        const current = this.#state.vaneVerticalDirection;
+        this.#setVane(
+          value === TargetFanState.AUTO
+            ? "Auto"
+            : current && current !== "Auto" && current !== "Swing"
+              ? current
+              : "Three",
+        );
+      });
+
+    service
+      .getCharacteristic(Characteristic.RotationSpeed)
+      .setProps({ minValue: 0, maxValue: 100, minStep: VANE_POSITION_STEP })
+      .onGet(() => vanePositionToPercent(this.#state.vaneVerticalDirection))
+      .onSet((value) => {
+        const vane = percentToVanePosition(Number(value));
+        if (!vane) {
+          return;
+        }
+        // Choosing a position leaves Auto and Swing behind.
+        this.#setVane(vane);
+      });
 
     service
       .getCharacteristic(Characteristic.SwingMode)
       .onGet(() => isSwinging(this.#state))
       .onSet((value) => {
         this.#setVane(value === SwingMode.ENABLED ? "Swing" : "Auto");
-      });
-
-    service
-      .getCharacteristic(Characteristic.CurrentTiltAngle)
-      .onGet(() => vanePositionToAngle(this.#state.vaneVerticalDirection) ?? 0);
-
-    service
-      .getCharacteristic(Characteristic.TargetTiltAngle)
-      .setProps({ minStep: 45 })
-      .onGet(() => vanePositionToAngle(this.#state.vaneVerticalDirection) ?? 0)
-      .onSet((value) => {
-        // Asking for an angle means asking for a fixed position, which leaves
-        // Auto and Swing behind.
-        this.#setVane(angleToVanePosition(Number(value)));
       });
   }
 
@@ -406,19 +429,18 @@ export class AtaAccessory {
   #syncVane(): void {
     const { Characteristic } = this.platform;
     const swinging = isSwinging(this.#state);
-    const angle = vanePositionToAngle(this.#state.vaneVerticalDirection);
+    const vane = this.#state.vaneVerticalDirection;
 
     this.#heaterCooler.updateCharacteristic(Characteristic.SwingMode, swinging);
     this.#fan?.updateCharacteristic(Characteristic.SwingMode, swinging);
     this.#vane?.updateCharacteristic(Characteristic.SwingMode, swinging);
+    this.#vane?.updateCharacteristic(Characteristic.RotationSpeed, vanePositionToPercent(vane));
+    this.#vane?.updateCharacteristic(Characteristic.TargetFanState, toVaneTargetFanState(vane));
     this.#vane?.updateCharacteristic(
-      Characteristic.CurrentSlatState,
-      toCurrentSlatState(this.#state),
+      Characteristic.CurrentFanState,
+      toCurrentFanState(this.#state),
     );
-    // Auto and Swing have no angle. Report centre for them so the stored value
-    // matches what the getters return, rather than leaving HAP's -90 default.
-    this.#vane?.updateCharacteristic(Characteristic.CurrentTiltAngle, angle ?? 0);
-    this.#vane?.updateCharacteristic(Characteristic.TargetTiltAngle, angle ?? 0);
+    this.#vane?.updateCharacteristic(Characteristic.Active, this.#state.power ? 1 : 0);
   }
 
   /** Keep every surface that shows fan speed agreeing with the current state. */

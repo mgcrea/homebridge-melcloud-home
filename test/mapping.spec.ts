@@ -1,9 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { capabilitiesSchema, type Capabilities, type UnitState } from "../src/api/types.js";
 import {
-  angleToVanePosition,
   CurrentFanState,
-  CurrentSlatState,
   CurrentState,
   SwingMode,
   TargetFanState,
@@ -19,9 +17,10 @@ import {
   toCurrentFanState,
   toCurrentState,
   toTargetFanState,
-  toCurrentSlatState,
   toTargetState,
-  vanePositionToAngle,
+  percentToVanePosition,
+  toVaneTargetFanState,
+  vanePositionToPercent,
 } from "../src/util/mapping.js";
 
 const capabilities = (overrides: Partial<Capabilities> = {}): Capabilities =>
@@ -189,37 +188,33 @@ describe("fan state", () => {
 });
 
 describe("vane position", () => {
-  it("spreads the five positions evenly across the tilt range", () => {
-    expect(vanePositionToAngle("One")).toBe(-90);
-    expect(vanePositionToAngle("Three")).toBe(0);
-    expect(vanePositionToAngle("Five")).toBe(90);
+  it("spreads the five positions evenly across the slider", () => {
+    expect(vanePositionToPercent("One")).toBe(20);
+    expect(vanePositionToPercent("Three")).toBe(60);
+    expect(vanePositionToPercent("Five")).toBe(100);
   });
 
   it("round-trips every fixed position", () => {
     for (const vane of ["One", "Two", "Three", "Four", "Five"] as const) {
-      expect(angleToVanePosition(vanePositionToAngle(vane)!)).toBe(vane);
+      expect(percentToVanePosition(vanePositionToPercent(vane))).toBe(vane);
     }
   });
 
-  it("has no angle for Auto or Swing, which are not positions", () => {
-    expect(vanePositionToAngle("Auto")).toBeUndefined();
-    expect(vanePositionToAngle("Swing")).toBeUndefined();
-    expect(vanePositionToAngle(undefined)).toBeUndefined();
+  it("keeps Auto and Swing off the slider", () => {
+    expect(vanePositionToPercent("Auto")).toBe(0);
+    expect(vanePositionToPercent("Swing")).toBe(0);
+    expect(vanePositionToPercent(undefined)).toBe(0);
+    expect(percentToVanePosition(0)).toBeUndefined();
   });
 
-  it("snaps an arbitrary angle onto the nearest position", () => {
-    expect(angleToVanePosition(-80)).toBe("One");
-    expect(angleToVanePosition(10)).toBe("Three");
-    expect(angleToVanePosition(1000)).toBe("Five");
-    expect(angleToVanePosition(-1000)).toBe("One");
+  it("never exceeds the five positions", () => {
+    expect(percentToVanePosition(1000)).toBe("Five");
+    expect(percentToVanePosition(1)).toBe("One");
   });
 
-  it("reports the slat as swinging only while a vane is swinging", () => {
-    expect(toCurrentSlatState(state({ vaneVerticalDirection: "Swing" }))).toBe(
-      CurrentSlatState.SWINGING,
-    );
-    expect(toCurrentSlatState(state({ vaneVerticalDirection: "Three" }))).toBe(
-      CurrentSlatState.FIXED,
-    );
+  it("maps automatic positioning onto the AUTO toggle", () => {
+    expect(toVaneTargetFanState("Auto")).toBe(TargetFanState.AUTO);
+    expect(toVaneTargetFanState("Three")).toBe(TargetFanState.MANUAL);
+    expect(toVaneTargetFanState("Swing")).toBe(TargetFanState.MANUAL);
   });
 });
