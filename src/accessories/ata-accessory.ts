@@ -123,9 +123,10 @@ export class AtaAccessory {
       }
       return undefined;
     }
-    const service = existing ?? this.accessory.addService(type, name, subtype);
-    service.setCharacteristic(this.platform.Characteristic.ConfiguredName, name);
-    return service;
+    // `addService` sets the Name characteristic, which is what these services
+    // are allowed to carry. ConfiguredName is not part of Switch or
+    // TemperatureSensor, and HAP only tolerates it with a warning.
+    return existing ?? this.accessory.addService(type, name, subtype);
   }
 
   // -------------------------------------------------------------------------
@@ -231,10 +232,8 @@ export class AtaAccessory {
         });
     }
 
-    service
-      .getCharacteristic(Characteristic.StatusFault)
-      .onGet(() => (this.#state.isInError ? 1 : 0));
-    service.getCharacteristic(Characteristic.StatusActive).onGet(() => this.#unit.isConnected);
+    // StatusFault and StatusActive are not part of HeaterCooler in HAP, so they
+    // are reported on the temperature sensor instead, where they are valid.
   }
 
   /** Bound the setpoint characteristics to what the current mode allows. */
@@ -243,19 +242,23 @@ export class AtaAccessory {
     const capabilities = this.#unit.capabilities;
     const minStep = temperatureStep(capabilities);
 
+    // Characteristics are created carrying HAP's default value, which sits
+    // outside the range these units accept. Narrowing the props without also
+    // moving the value logs an "illegal value" warning on every start, so seed
+    // the current setpoint (clamped) at the same time.
+    const current = this.#state.setTemperature ?? 21;
+
     const heat = temperatureRangeFor("Heat", capabilities);
-    this.#heaterCooler.getCharacteristic(Characteristic.HeatingThresholdTemperature).setProps({
-      minValue: heat.min,
-      maxValue: heat.max,
-      minStep,
-    });
+    this.#heaterCooler
+      .getCharacteristic(Characteristic.HeatingThresholdTemperature)
+      .updateValue(Math.min(Math.max(current, heat.min), heat.max))
+      .setProps({ minValue: heat.min, maxValue: heat.max, minStep });
 
     const cool = temperatureRangeFor(mode === "Automatic" ? "Automatic" : "Cool", capabilities);
-    this.#heaterCooler.getCharacteristic(Characteristic.CoolingThresholdTemperature).setProps({
-      minValue: cool.min,
-      maxValue: cool.max,
-      minStep,
-    });
+    this.#heaterCooler
+      .getCharacteristic(Characteristic.CoolingThresholdTemperature)
+      .updateValue(Math.min(Math.max(current, cool.min), cool.max))
+      .setProps({ minValue: cool.min, maxValue: cool.max, minStep });
   }
 
   #configureExtras(): void {
@@ -342,8 +345,14 @@ export class AtaAccessory {
       Characteristic.TargetHeaterCoolerState,
       toTargetState(this.#state.operationMode),
     );
-    service.updateCharacteristic(Characteristic.StatusFault, this.#state.isInError ? 1 : 0);
-    service.updateCharacteristic(Characteristic.StatusActive, this.#unit.isConnected);
+    this.#temperatureSensor?.updateCharacteristic(
+      Characteristic.StatusFault,
+      this.#state.isInError ? 1 : 0,
+    );
+    this.#temperatureSensor?.updateCharacteristic(
+      Characteristic.StatusActive,
+      this.#unit.isConnected,
+    );
 
     if (this.#state.roomTemperature !== undefined) {
       service.updateCharacteristic(Characteristic.CurrentTemperature, this.#state.roomTemperature);
