@@ -73,6 +73,8 @@ export class AtaAccessory {
     this.#heaterCooler =
       this.accessory.getService(Service.HeaterCooler) ??
       this.accessory.addService(Service.HeaterCooler, unit.givenDisplayName);
+    // The unit is a thermostat first; any extra services are accessories to it.
+    this.#heaterCooler.setPrimaryService(true);
 
     this.#temperatureSensor = this.#optionalService(
       platform.options.exposeTemperatureSensors,

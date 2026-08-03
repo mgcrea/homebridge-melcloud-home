@@ -11,8 +11,9 @@ Homebridge plugin for Mitsubishi Electric air conditioners on **MELCloud Home**
 
 - Each air-to-air unit appears as a HomeKit **Heater Cooler**: power, heat/cool/auto,
   target temperature, fan speed and swing.
-- **Dry**, **Fan** and **automatic fan speed** exposed as switches, since HomeKit has no
-  native equivalent for any of them.
+- **Dry**, **Fan** and **automatic fan speed** available as opt-in switches, since HomeKit
+  has no native equivalent for any of them. Off by default — HomeKit gives every service
+  its own tile, so enabling all three turns one air conditioner into four tiles.
 - Optional per-unit **temperature sensor**, plus fault and connectivity status.
 - **Real-time updates** over the platform's push feed, so changes made from a physical
   remote or the official app show up within seconds rather than at the next poll.
@@ -56,9 +57,9 @@ Add a platform block to `config.json`, or use the Homebridge UI form:
 | `pollInterval` | `60` | Seconds between polls. Clamped to a 30 second minimum. |
 | `useWebSocket` | `true` | Subscribe to real-time push updates. |
 | `exposeTemperatureSensors` | `true` | Add a standalone temperature sensor per unit. |
-| `exposeDrySwitch` | `true` | Switch for dry mode, on units that support it. |
-| `exposeFanSwitch` | `true` | Switch for fan-only mode. |
-| `exposeAutoFanSwitch` | `true` | Switch for automatic fan speed. |
+| `exposeDrySwitch` | `false` | Switch for dry mode, on units that support it. Extra tile. |
+| `exposeFanSwitch` | `false` | Switch for fan-only mode. Extra tile. |
+| `exposeAutoFanSwitch` | `false` | Switch for automatic fan speed. Extra tile. |
 | `exposeEnergy` | `false` | Reserved for a future release. Enabling it currently does nothing. |
 | `debug` | `false` | Verbose, redacted request logging. |
 

@@ -49,20 +49,20 @@
       "exposeDrySwitch": {
         "title": "Expose Dry mode switch",
         "type": "boolean",
-        "default": true,
-        "description": "HomeKit has no dry mode, so it is offered as a switch. Only shown for units that support it."
+        "default": false,
+        "description": "Dry mode has no HomeKit equivalent, so it is offered as a separate switch. Adds one extra tile per unit."
       },
       "exposeFanSwitch": {
         "title": "Expose Fan mode switch",
         "type": "boolean",
-        "default": true,
-        "description": "HomeKit has no fan-only mode, so it is offered as a switch."
+        "default": false,
+        "description": "Fan-only mode has no HomeKit equivalent, so it is offered as a separate switch. Adds one extra tile per unit."
       },
       "exposeAutoFanSwitch": {
         "title": "Expose automatic fan speed switch",
         "type": "boolean",
-        "default": true,
-        "description": "Automatic fan speed cannot be represented on the HomeKit fan slider, so it is offered as a switch."
+        "default": false,
+        "description": "The HomeKit fan slider has no automatic position, so it is offered as a separate switch. Adds one extra tile per unit."
       },
       "exposeEnergy": {
         "title": "Expose energy telemetry (not yet implemented)",

@@ -17,6 +17,10 @@ describe("parseConfig", () => {
       pollIntervalMs: 60_000,
       useWebSocket: true,
       exposeTemperatureSensors: true,
+      // Opt-in: each of these is an extra HomeKit tile per unit.
+      exposeDrySwitch: false,
+      exposeFanSwitch: false,
+      exposeAutoFanSwitch: false,
       exposeEnergy: false,
       debug: false,
     });

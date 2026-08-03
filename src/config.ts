@@ -55,9 +55,11 @@ export const parseConfig = (config: PlatformConfig): MelCloudHomeConfig => {
     writeDebounceMs: DEFAULT_WRITE_DEBOUNCE_MS,
     useWebSocket: boolean(config["useWebSocket"], true),
     exposeTemperatureSensors: boolean(config["exposeTemperatureSensors"], true),
-    exposeDrySwitch: boolean(config["exposeDrySwitch"], true),
-    exposeFanSwitch: boolean(config["exposeFanSwitch"], true),
-    exposeAutoFanSwitch: boolean(config["exposeAutoFanSwitch"], true),
+    // HomeKit gives every service of a bridged accessory its own tile, so these
+    // are opt-in: three extra toggles per unit buries the thermostat itself.
+    exposeDrySwitch: boolean(config["exposeDrySwitch"], false),
+    exposeFanSwitch: boolean(config["exposeFanSwitch"], false),
+    exposeAutoFanSwitch: boolean(config["exposeAutoFanSwitch"], false),
     exposeEnergy: boolean(config["exposeEnergy"], false),
     debug: boolean(config["debug"], false),
   };
