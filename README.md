@@ -36,7 +36,6 @@ Homebridge plugin for Mitsubishi Electric air conditioners on **MELCloud Home**
 - **Fan speed, automatic fan speed and swing** included natively, on a companion Fan
   service — the Home app does not render them on a Heater Cooler. It folds into the same
   control, so a unit stays a single accessory.
-- **Vane position** on a second Fan control, whose slider picks one of the five positions.
 - **Dry** and **fan-only** mode available as opt-in switches, since HomeKit has no native
   equivalent. Off by default: the modes are already reachable from the mode picker.
 - Optional per-unit **temperature sensor** (off by default — the climate control already
@@ -83,7 +82,7 @@ Add a platform block to `config.json`, or use the Homebridge UI form:
 | `pollInterval` | `60` | Seconds between polls. Clamped to a 30 second minimum. |
 | `useWebSocket` | `true` | Subscribe to real-time push updates. |
 | `exposeFanService` | `true` | Fan speed, auto and swing. The only native way to reach them; folds into the same control. |
-| `exposeVaneControl` | `true` | Vane position as a second Fan control: slider picks the position, AUTO and swing alongside. |
+| `exposeVaneControl` | `false` | Vane position as a second Fan control. Off by default — see Limitations. |
 | `exposeTemperatureSensors` | `false` | Separate temperature sensor per unit. Duplicates the climate reading, but carries fault/connectivity status. |
 | `exposeDrySwitch` | `false` | Switch for dry mode, on units that support it. Extra control. |
 | `exposeFanSwitch` | `false` | Switch for fan-only mode. Extra control. |
@@ -192,13 +191,14 @@ it here too, or publishes will start failing authentication.
 - Air-to-water units (Ecodan heat pumps) are recognised in the API but not yet exposed.
 - Horizontal vane position is read but not individually controllable from HomeKit, which
   has no characteristic for it.
-- Vertical vane position rides on a second Fan control whose speed slider is really the
-  position. HAP does model a louver properly — the `Slats` service, with a tilt angle — but
-  Apple's Home app has never shipped UI for it, so it is invisible where it matters. A fan
-  slider is the only representation that is both native and rendered. Set
-  `exposeVaneControl: false` to drop it. HomeKit has no general-purpose selector
-  characteristic, so a labelled list of positions is not possible without presenting the
-  unit as a television.
+- Vertical vane position has no usable HomeKit representation. HAP models a louver properly
+  with the `Slats` service and a tilt angle, but Apple's Home app does not draw that service.
+  The only visible alternative is a second Fan control whose slider is really the position —
+  available via `exposeVaneControl`, but off by default, because the Home app renders it as a
+  second identical fan slider and refuses to label the two differently: `ConfiguredName`, the
+  characteristic it uses for per-service names, is not permitted on a Fan service. Swing
+  on/off remains available on the main fan. A labelled list of positions is not possible
+  without presenting the unit as a television.
 - Energy telemetry is **not implemented**. The `exposeEnergy` option is accepted and the
   endpoint is known, but the response shape has never been captured, so there is nothing
   to parse yet. Enabling the option logs a warning and changes nothing. Units reporting

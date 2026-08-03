@@ -49,8 +49,8 @@
       "exposeVaneControl": {
         "title": "Expose vane position as a Fan control",
         "type": "boolean",
-        "default": true,
-        "description": "Adds a second Fan control per unit whose speed slider is really the vane position, plus AUTO for automatic positioning and a swing toggle. HAP's proper louver service (Slats) is not rendered by Apple's Home app, so a fan slider is the only representation that is both native and visible."
+        "default": false,
+        "description": "Adds a second Fan control per unit whose speed slider is really the vane position. Off by default: the Home app draws it as another identical fan slider, and will not label the two differently \u2014 ConfiguredName is not permitted on a Fan service \u2014 so in practice you get two indistinguishable controls. HAP's proper louver service (Slats) is not rendered by the Home app at all."
       },
       "exposeTemperatureSensors": {
         "title": "Expose temperature sensors",
