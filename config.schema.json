@@ -1,0 +1,103 @@
+{
+  "pluginAlias": "MELCloudHome",
+  "pluginType": "platform",
+  "singular": true,
+  "headerDisplay": "Controls Mitsubishi Electric air conditioners registered on **MELCloud Home** (melcloudhome.com). This is the newer platform used by 4th-generation Wi-Fi adapters — if your units are on the older `app.melcloud.com` service, use a legacy MELCloud plugin instead.",
+  "footerDisplay": "Your credentials are sent only to Mitsubishi's own identity provider and are never written to disk. Access tokens are cached under the Homebridge storage directory so restarts do not require a fresh sign-in.",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "title": "Name",
+        "type": "string",
+        "default": "MELCloud Home",
+        "required": true
+      },
+      "email": {
+        "title": "Email",
+        "type": "string",
+        "format": "email",
+        "required": true,
+        "description": "The email address for your MELCloud Home account."
+      },
+      "password": {
+        "title": "Password",
+        "type": "string",
+        "required": true,
+        "x-schema-form": { "type": "password" },
+        "description": "The password for your MELCloud Home account."
+      },
+      "pollInterval": {
+        "title": "Poll interval (seconds)",
+        "type": "integer",
+        "default": 60,
+        "minimum": 30,
+        "description": "How often to poll for state. Values below 30 seconds risk rate limiting and are clamped."
+      },
+      "useWebSocket": {
+        "title": "Real-time updates",
+        "type": "boolean",
+        "default": true,
+        "description": "Subscribe to the platform's push feed so changes made from a remote or the MELCloud Home app appear within seconds. Polling continues as a fallback."
+      },
+      "exposeTemperatureSensors": {
+        "title": "Expose temperature sensors",
+        "type": "boolean",
+        "default": true,
+        "description": "Add a separate temperature sensor per unit, usable in automations."
+      },
+      "exposeDrySwitch": {
+        "title": "Expose Dry mode switch",
+        "type": "boolean",
+        "default": true,
+        "description": "HomeKit has no dry mode, so it is offered as a switch. Only shown for units that support it."
+      },
+      "exposeFanSwitch": {
+        "title": "Expose Fan mode switch",
+        "type": "boolean",
+        "default": true,
+        "description": "HomeKit has no fan-only mode, so it is offered as a switch."
+      },
+      "exposeAutoFanSwitch": {
+        "title": "Expose automatic fan speed switch",
+        "type": "boolean",
+        "default": true,
+        "description": "Automatic fan speed cannot be represented on the HomeKit fan slider, so it is offered as a switch."
+      },
+      "exposeEnergy": {
+        "title": "Expose energy telemetry (not yet implemented)",
+        "type": "boolean",
+        "default": false,
+        "description": "Reserved for a future release — enabling this currently does nothing. The telemetry endpoint is known, but its response shape has not been captured, and units reporting isEnergyUsageCompatible: false are unlikely to return usable data at all."
+      },
+      "debug": {
+        "title": "Verbose logging",
+        "type": "boolean",
+        "default": false,
+        "description": "Log the full request trace. Credentials, tokens and authorization codes are always redacted."
+      }
+    }
+  },
+  "layout": [
+    { "type": "fieldset", "title": "Account", "items": ["name", "email", "password"] },
+    {
+      "type": "fieldset",
+      "title": "Updates",
+      "expandable": true,
+      "items": ["useWebSocket", "pollInterval"]
+    },
+    {
+      "type": "fieldset",
+      "title": "Accessories",
+      "expandable": true,
+      "items": [
+        "exposeTemperatureSensors",
+        "exposeDrySwitch",
+        "exposeFanSwitch",
+        "exposeAutoFanSwitch",
+        "exposeEnergy"
+      ]
+    },
+    { "type": "fieldset", "title": "Advanced", "expandable": true, "items": ["debug"] }
+  ]
+}

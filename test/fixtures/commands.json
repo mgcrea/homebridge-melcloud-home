@@ -1,0 +1,275 @@
+[
+  {
+    "unitId": "11111111-1111-4111-8111-111111111111",
+    "payload": {
+      "power": true,
+      "operationMode": null,
+      "setFanSpeed": null,
+      "vaneHorizontalDirection": null,
+      "vaneVerticalDirection": null,
+      "setTemperature": null,
+      "temperatureIncrementOverride": null,
+      "inStandbyMode": null
+    }
+  },
+  {
+    "unitId": "22222222-2222-4222-8222-222222222222",
+    "payload": {
+      "power": null,
+      "operationMode": null,
+      "setFanSpeed": null,
+      "vaneHorizontalDirection": null,
+      "vaneVerticalDirection": null,
+      "setTemperature": 24,
+      "temperatureIncrementOverride": null,
+      "inStandbyMode": null
+    }
+  },
+  {
+    "unitId": "22222222-2222-4222-8222-222222222222",
+    "payload": {
+      "power": null,
+      "operationMode": null,
+      "setFanSpeed": null,
+      "vaneHorizontalDirection": null,
+      "vaneVerticalDirection": null,
+      "setTemperature": 24.5,
+      "temperatureIncrementOverride": null,
+      "inStandbyMode": null
+    }
+  },
+  {
+    "unitId": "22222222-2222-4222-8222-222222222222",
+    "payload": {
+      "power": null,
+      "operationMode": "Automatic",
+      "setFanSpeed": null,
+      "vaneHorizontalDirection": null,
+      "vaneVerticalDirection": null,
+      "setTemperature": null,
+      "temperatureIncrementOverride": null,
+      "inStandbyMode": null
+    }
+  },
+  {
+    "unitId": "22222222-2222-4222-8222-222222222222",
+    "payload": {
+      "power": null,
+      "operationMode": null,
+      "setFanSpeed": "Auto",
+      "vaneHorizontalDirection": null,
+      "vaneVerticalDirection": null,
+      "setTemperature": null,
+      "temperatureIncrementOverride": null,
+      "inStandbyMode": null
+    }
+  },
+  {
+    "unitId": "22222222-2222-4222-8222-222222222222",
+    "payload": {
+      "power": null,
+      "operationMode": null,
+      "setFanSpeed": "Two",
+      "vaneHorizontalDirection": null,
+      "vaneVerticalDirection": null,
+      "setTemperature": null,
+      "temperatureIncrementOverride": null,
+      "inStandbyMode": null
+    }
+  },
+  {
+    "unitId": "22222222-2222-4222-8222-222222222222",
+    "payload": {
+      "power": null,
+      "operationMode": null,
+      "setFanSpeed": "Five",
+      "vaneHorizontalDirection": null,
+      "vaneVerticalDirection": null,
+      "setTemperature": null,
+      "temperatureIncrementOverride": null,
+      "inStandbyMode": null
+    }
+  },
+  {
+    "unitId": "22222222-2222-4222-8222-222222222222",
+    "payload": {
+      "power": null,
+      "operationMode": null,
+      "setFanSpeed": null,
+      "vaneHorizontalDirection": null,
+      "vaneVerticalDirection": "Swing",
+      "setTemperature": null,
+      "temperatureIncrementOverride": null,
+      "inStandbyMode": null
+    }
+  },
+  {
+    "unitId": "22222222-2222-4222-8222-222222222222",
+    "payload": {
+      "power": null,
+      "operationMode": null,
+      "setFanSpeed": null,
+      "vaneHorizontalDirection": null,
+      "vaneVerticalDirection": "One",
+      "setTemperature": null,
+      "temperatureIncrementOverride": null,
+      "inStandbyMode": null
+    }
+  },
+  {
+    "unitId": "22222222-2222-4222-8222-222222222222",
+    "payload": {
+      "power": null,
+      "operationMode": null,
+      "setFanSpeed": null,
+      "vaneHorizontalDirection": null,
+      "vaneVerticalDirection": "Two",
+      "setTemperature": null,
+      "temperatureIncrementOverride": null,
+      "inStandbyMode": null
+    }
+  },
+  {
+    "unitId": "22222222-2222-4222-8222-222222222222",
+    "payload": {
+      "power": null,
+      "operationMode": null,
+      "setFanSpeed": null,
+      "vaneHorizontalDirection": null,
+      "vaneVerticalDirection": "Three",
+      "setTemperature": null,
+      "temperatureIncrementOverride": null,
+      "inStandbyMode": null
+    }
+  },
+  {
+    "unitId": "22222222-2222-4222-8222-222222222222",
+    "payload": {
+      "power": null,
+      "operationMode": null,
+      "setFanSpeed": null,
+      "vaneHorizontalDirection": null,
+      "vaneVerticalDirection": "Four",
+      "setTemperature": null,
+      "temperatureIncrementOverride": null,
+      "inStandbyMode": null
+    }
+  },
+  {
+    "unitId": "22222222-2222-4222-8222-222222222222",
+    "payload": {
+      "power": null,
+      "operationMode": null,
+      "setFanSpeed": null,
+      "vaneHorizontalDirection": null,
+      "vaneVerticalDirection": "Five",
+      "setTemperature": null,
+      "temperatureIncrementOverride": null,
+      "inStandbyMode": null
+    }
+  },
+  {
+    "unitId": "22222222-2222-4222-8222-222222222222",
+    "payload": {
+      "power": null,
+      "operationMode": null,
+      "setFanSpeed": null,
+      "vaneHorizontalDirection": "Swing",
+      "vaneVerticalDirection": null,
+      "setTemperature": null,
+      "temperatureIncrementOverride": null,
+      "inStandbyMode": null
+    }
+  },
+  {
+    "unitId": "22222222-2222-4222-8222-222222222222",
+    "payload": {
+      "power": null,
+      "operationMode": null,
+      "setFanSpeed": null,
+      "vaneHorizontalDirection": "Left",
+      "vaneVerticalDirection": null,
+      "setTemperature": null,
+      "temperatureIncrementOverride": null,
+      "inStandbyMode": null
+    }
+  },
+  {
+    "unitId": "22222222-2222-4222-8222-222222222222",
+    "payload": {
+      "power": null,
+      "operationMode": null,
+      "setFanSpeed": null,
+      "vaneHorizontalDirection": "LeftCentre",
+      "vaneVerticalDirection": null,
+      "setTemperature": null,
+      "temperatureIncrementOverride": null,
+      "inStandbyMode": null
+    }
+  },
+  {
+    "unitId": "22222222-2222-4222-8222-222222222222",
+    "payload": {
+      "power": null,
+      "operationMode": null,
+      "setFanSpeed": null,
+      "vaneHorizontalDirection": "Centre",
+      "vaneVerticalDirection": null,
+      "setTemperature": null,
+      "temperatureIncrementOverride": null,
+      "inStandbyMode": null
+    }
+  },
+  {
+    "unitId": "22222222-2222-4222-8222-222222222222",
+    "payload": {
+      "power": null,
+      "operationMode": null,
+      "setFanSpeed": null,
+      "vaneHorizontalDirection": "RightCentre",
+      "vaneVerticalDirection": null,
+      "setTemperature": null,
+      "temperatureIncrementOverride": null,
+      "inStandbyMode": null
+    }
+  },
+  {
+    "unitId": "22222222-2222-4222-8222-222222222222",
+    "payload": {
+      "power": null,
+      "operationMode": null,
+      "setFanSpeed": null,
+      "vaneHorizontalDirection": "Right",
+      "vaneVerticalDirection": null,
+      "setTemperature": null,
+      "temperatureIncrementOverride": null,
+      "inStandbyMode": null
+    }
+  },
+  {
+    "unitId": "22222222-2222-4222-8222-222222222222",
+    "payload": {
+      "power": null,
+      "operationMode": "Cool",
+      "setFanSpeed": null,
+      "vaneHorizontalDirection": null,
+      "vaneVerticalDirection": null,
+      "setTemperature": null,
+      "temperatureIncrementOverride": null,
+      "inStandbyMode": null
+    }
+  },
+  {
+    "unitId": "11111111-1111-4111-8111-111111111111",
+    "payload": {
+      "power": false,
+      "operationMode": null,
+      "setFanSpeed": null,
+      "vaneHorizontalDirection": null,
+      "vaneVerticalDirection": null,
+      "setTemperature": null,
+      "temperatureIncrementOverride": null,
+      "inStandbyMode": null
+    }
+  }
+]

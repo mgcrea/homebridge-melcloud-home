@@ -1,0 +1,294 @@
+{
+  "id": "00000000-0000-4000-8000-000000000000",
+  "firstname": "Test",
+  "lastname": "User",
+  "email": "user@example.com",
+  "language": "en",
+  "country": "FR",
+  "numberOfDevicesAllowed": 10,
+  "numberOfBuildingsAllowed": 2,
+  "numberOfGuestUsersAllowedPerUnit": 5,
+  "numberOfGuestDevicesAllowed": 10,
+  "buildings": [
+    {
+      "id": "bbbbbbbb-0000-4000-8000-000000000001",
+      "name": "Test Building",
+      "timezone": "Europe/Paris",
+      "airToAirUnits": [
+        {
+          "unitSettings": null,
+          "schedule": [],
+          "scheduleEnabled": true,
+          "connectedInterfaceIdentifier": "FE00000000000000000000000000000001",
+          "capabilities": {
+            "isMultiSplitSystem": true,
+            "isLegacyDevice": false,
+            "hasStandby": true,
+            "hasCoolOperationMode": true,
+            "hasHeatOperationMode": true,
+            "hasAutoOperationMode": true,
+            "hasDryOperationMode": true,
+            "hasAutomaticFanSpeed": true,
+            "hasAirDirection": true,
+            "hasSwing": true,
+            "hasExtendedTemperatureRange": true,
+            "hasEnergyConsumedMeter": true,
+            "numberOfFanSpeeds": 5,
+            "minTempCoolDry": 16,
+            "maxTempCoolDry": 31,
+            "minTempHeat": 10,
+            "maxTempHeat": 31,
+            "minTempAutomatic": 16,
+            "maxTempAutomatic": 31,
+            "hasDemandSideControl": true,
+            "hasHalfDegreeIncrements": true,
+            "supportsWideVane": false
+          },
+          "frostProtection": null,
+          "overheatProtection": null,
+          "holidayMode": null,
+          "connectedInterfaceType": "fourthGenWifi",
+          "systemId": "aaaaaaaa-0000-4000-8000-000000000001",
+          "id": "11111111-1111-4111-8111-111111111111",
+          "givenDisplayName": "Unit One",
+          "displayIcon": "Nursery",
+          "settings": [
+            {
+              "name": "RoomTemperature",
+              "value": "27"
+            },
+            {
+              "name": "Power",
+              "value": "False"
+            },
+            {
+              "name": "OperationMode",
+              "value": "Cool"
+            },
+            {
+              "name": "ActualFanSpeed",
+              "value": "Off"
+            },
+            {
+              "name": "SetFanSpeed",
+              "value": "One"
+            },
+            {
+              "name": "VaneHorizontalDirection",
+              "value": "Centre"
+            },
+            {
+              "name": "VaneVerticalDirection",
+              "value": "Auto"
+            },
+            {
+              "name": "InStandbyMode",
+              "value": "False"
+            },
+            {
+              "name": "SetTemperature",
+              "value": "24"
+            },
+            {
+              "name": "IsInError",
+              "value": "False"
+            },
+            {
+              "name": "ErrorCode",
+              "value": ""
+            }
+          ],
+          "timeZone": "Europe/Paris",
+          "rssi": -64,
+          "isConnected": true,
+          "isInError": false,
+          "energyProducedOptIn": null,
+          "isEnergyUsageCompatible": false
+        },
+        {
+          "unitSettings": null,
+          "schedule": [],
+          "scheduleEnabled": true,
+          "connectedInterfaceIdentifier": "FE00000000000000000000000000000002",
+          "capabilities": {
+            "isMultiSplitSystem": true,
+            "isLegacyDevice": false,
+            "hasStandby": true,
+            "hasCoolOperationMode": true,
+            "hasHeatOperationMode": true,
+            "hasAutoOperationMode": true,
+            "hasDryOperationMode": true,
+            "hasAutomaticFanSpeed": true,
+            "hasAirDirection": true,
+            "hasSwing": true,
+            "hasExtendedTemperatureRange": true,
+            "hasEnergyConsumedMeter": true,
+            "numberOfFanSpeeds": 5,
+            "minTempCoolDry": 16,
+            "maxTempCoolDry": 31,
+            "minTempHeat": 10,
+            "maxTempHeat": 31,
+            "minTempAutomatic": 16,
+            "maxTempAutomatic": 31,
+            "hasDemandSideControl": true,
+            "hasHalfDegreeIncrements": true,
+            "supportsWideVane": false
+          },
+          "frostProtection": null,
+          "overheatProtection": null,
+          "holidayMode": null,
+          "connectedInterfaceType": "fourthGenWifi",
+          "systemId": "aaaaaaaa-0000-4000-8000-000000000002",
+          "id": "22222222-2222-4222-8222-222222222222",
+          "givenDisplayName": "Unit Two",
+          "displayIcon": "Bedroom",
+          "settings": [
+            {
+              "name": "RoomTemperature",
+              "value": "27.5"
+            },
+            {
+              "name": "Power",
+              "value": "False"
+            },
+            {
+              "name": "OperationMode",
+              "value": "Cool"
+            },
+            {
+              "name": "ActualFanSpeed",
+              "value": "Off"
+            },
+            {
+              "name": "SetFanSpeed",
+              "value": "One"
+            },
+            {
+              "name": "VaneHorizontalDirection",
+              "value": "Right"
+            },
+            {
+              "name": "VaneVerticalDirection",
+              "value": "Auto"
+            },
+            {
+              "name": "InStandbyMode",
+              "value": "False"
+            },
+            {
+              "name": "SetTemperature",
+              "value": "23"
+            },
+            {
+              "name": "IsInError",
+              "value": "False"
+            },
+            {
+              "name": "ErrorCode",
+              "value": ""
+            }
+          ],
+          "timeZone": "Europe/Paris",
+          "rssi": -41,
+          "isConnected": true,
+          "isInError": false,
+          "energyProducedOptIn": null,
+          "isEnergyUsageCompatible": false
+        },
+        {
+          "unitSettings": null,
+          "schedule": [],
+          "scheduleEnabled": true,
+          "connectedInterfaceIdentifier": "FE00000000000000000000000000000003",
+          "capabilities": {
+            "isMultiSplitSystem": true,
+            "isLegacyDevice": false,
+            "hasStandby": true,
+            "hasCoolOperationMode": true,
+            "hasHeatOperationMode": true,
+            "hasAutoOperationMode": true,
+            "hasDryOperationMode": true,
+            "hasAutomaticFanSpeed": true,
+            "hasAirDirection": true,
+            "hasSwing": true,
+            "hasExtendedTemperatureRange": true,
+            "hasEnergyConsumedMeter": true,
+            "numberOfFanSpeeds": 5,
+            "minTempCoolDry": 16,
+            "maxTempCoolDry": 31,
+            "minTempHeat": 10,
+            "maxTempHeat": 31,
+            "minTempAutomatic": 16,
+            "maxTempAutomatic": 31,
+            "hasDemandSideControl": true,
+            "hasHalfDegreeIncrements": true,
+            "supportsWideVane": false
+          },
+          "frostProtection": null,
+          "overheatProtection": null,
+          "holidayMode": null,
+          "connectedInterfaceType": "fourthGenWifi",
+          "systemId": "aaaaaaaa-0000-4000-8000-000000000002",
+          "id": "33333333-3333-4333-8333-333333333333",
+          "givenDisplayName": "Unit Three",
+          "displayIcon": "GuestBedroom",
+          "settings": [
+            {
+              "name": "RoomTemperature",
+              "value": "28"
+            },
+            {
+              "name": "Power",
+              "value": "False"
+            },
+            {
+              "name": "OperationMode",
+              "value": "Cool"
+            },
+            {
+              "name": "ActualFanSpeed",
+              "value": "Off"
+            },
+            {
+              "name": "SetFanSpeed",
+              "value": "One"
+            },
+            {
+              "name": "VaneHorizontalDirection",
+              "value": "Centre"
+            },
+            {
+              "name": "VaneVerticalDirection",
+              "value": "Auto"
+            },
+            {
+              "name": "InStandbyMode",
+              "value": "False"
+            },
+            {
+              "name": "SetTemperature",
+              "value": "23"
+            },
+            {
+              "name": "IsInError",
+              "value": "False"
+            },
+            {
+              "name": "ErrorCode",
+              "value": ""
+            }
+          ],
+          "timeZone": "Europe/Paris",
+          "rssi": -43,
+          "isConnected": true,
+          "isInError": false,
+          "energyProducedOptIn": null,
+          "isEnergyUsageCompatible": false
+        }
+      ],
+      "airToWaterUnits": []
+    }
+  ],
+  "guestBuildings": [],
+  "scenes": []
+}
