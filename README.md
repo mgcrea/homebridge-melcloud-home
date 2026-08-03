@@ -107,6 +107,53 @@ Tests run entirely against recorded fixtures via `msw`; nothing reaches the real
 The fixtures were generated from Charles captures of the official iOS app and scrubbed of
 all identifying data by `scripts/build-fixtures.py`.
 
+See [`docs/protocol.md`](docs/protocol.md) for the annotated wire protocol.
+
+## Releasing
+
+Versioning happens locally, publishing happens in CI.
+
+```sh
+pnpm release            # or: pnpm release minor
+```
+
+`release-it` runs the test suite and a build, bumps the version, commits as
+`chore(release): cut the vX.Y.Z release`, tags it (`0.2.0`, unprefixed), pushes, and opens
+a GitHub release. It does **not** publish to npm — pushing the tag triggers
+[`.github/workflows/release.yml`](.github/workflows/release.yml), which reruns the checks,
+verifies the tag matches `package.json`, and publishes.
+
+Set `GITHUB_TOKEN` in your environment first, or release-it falls back to opening the
+GitHub release form in a browser instead of creating it directly.
+
+Publishing uses npm [trusted publishing](https://docs.npmjs.com/trusted-publishers) via
+OIDC, so there is no `NPM_TOKEN` to store or rotate, and every release carries a
+[provenance attestation](https://docs.npmjs.com/generating-provenance-statements) tying the
+tarball to the workflow run that built it.
+
+### One-time setup
+
+Trusted publishing is configured against a package that already exists, so the first
+release has to be published by hand:
+
+```sh
+pnpm test && pnpm build
+npm publish --access public
+```
+
+Then on npmjs.com → the package → *Settings* → *Trusted Publisher*, add a GitHub Actions
+publisher with:
+
+| Field | Value |
+| --- | --- |
+| Organization / user | `mgcrea` |
+| Repository | `homebridge-melcloud-home` |
+| Workflow filename | `release.yml` |
+| Environment | *(leave empty)* |
+
+Every release after that is just `pnpm release`. Renaming the workflow file means updating
+it here too, or publishes will start failing authentication.
+
 ## Limitations
 
 - Air-to-water units (Ecodan heat pumps) are recognised in the API but not yet exposed.

@@ -4,7 +4,10 @@
   "version": "0.1.0",
   "description": "Homebridge plugin for Mitsubishi Electric air conditioners on the MELCloud Home platform",
   "author": "Olivier Louvignes <olivier@mgcrea.io>",
-  "repository": "github:mgcrea/homebridge-melcloud-home",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mgcrea/homebridge-melcloud-home.git"
+  },
   "homepage": "https://github.com/mgcrea/homebridge-melcloud-home#readme",
   "bugs": "https://github.com/mgcrea/homebridge-melcloud-home/issues",
   "license": "MIT",
@@ -43,6 +46,7 @@
     "probe": "tsx scripts/probe.ts",
     "dev:homebridge": "homebridge -D -U ./.homebridge -P . --strict-plugin-resolution",
     "test": "pnpm run lint && pnpm run check && pnpm run spec && pnpm run format:check",
+    "release": "release-it",
     "prepublishOnly": "pnpm run test && pnpm run build"
   },
   "engines": {
@@ -66,6 +70,7 @@
     "msw": "^2.12.4",
     "oxfmt": "^0.61.0",
     "oxlint": "^1.76.0",
+    "release-it": "^21.0.1",
     "tsdown": "^0.21.8",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3",
