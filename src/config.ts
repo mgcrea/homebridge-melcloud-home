@@ -55,16 +55,17 @@ export const parseConfig = (config: PlatformConfig): MelCloudHomeConfig => {
     pollIntervalMs,
     writeDebounceMs: DEFAULT_WRITE_DEBOUNCE_MS,
     useWebSocket: boolean(config["useWebSocket"], true),
-    // The Home app does not render fan speed or swing on a Heater Cooler tile,
-    // so a Fan service is the only way to reach them natively. On by default:
-    // without it, airflow control is unreachable outside third-party apps.
+    // The Home app does not render fan speed or swing on a Heater Cooler, so a
+    // Fan service is the only way to reach them natively. It folds into the
+    // same control as the Heater Cooler rather than appearing separately,
+    // because the Heater Cooler is marked the primary service.
     exposeFanService: boolean(config["exposeFanService"], true),
-    // The Heater Cooler tile already reports room temperature, so a separate
-    // sensor is a duplicate reading on its own tile. Opt in when a distinct
-    // sensor is wanted for automations or history.
+    // The Heater Cooler already reports room temperature, so a separate sensor
+    // is a duplicate reading. Opt in when a distinct sensor is wanted for
+    // automations or history.
     exposeTemperatureSensors: boolean(config["exposeTemperatureSensors"], false),
-    // HomeKit gives every service of a bridged accessory its own tile, so these
-    // are opt-in: three extra toggles per unit buries the thermostat itself.
+    // Opt-in: each is another control on the accessory, and the mode they set
+    // is already reachable from the Heater Cooler's own mode picker.
     exposeDrySwitch: boolean(config["exposeDrySwitch"], false),
     exposeFanSwitch: boolean(config["exposeFanSwitch"], false),
     exposeAutoFanSwitch: boolean(config["exposeAutoFanSwitch"], false),

@@ -253,13 +253,14 @@ export class AtaAccessory {
   /**
    * Airflow, as a Fan service.
    *
-   * The Home app does not surface RotationSpeed or SwingMode on a HeaterCooler
-   * tile, so fan speed, automatic fan speed and swing are unreachable there.
-   * Fanv2 is rendered as a real fan with a speed slider and an AUTO toggle,
-   * which is the only native way to drive any of it.
+   * The Home app does not surface RotationSpeed or SwingMode on a HeaterCooler,
+   * so fan speed, automatic fan speed and swing are unreachable there. Fanv2
+   * gets a speed slider and an AUTO toggle, which is the only native way to
+   * drive any of it. Because the HeaterCooler is the primary service, the Home
+   * app folds this into the same control rather than showing it separately.
    *
    * Active mirrors unit power rather than a fan-only mode: the fan cannot run
-   * with the unit off, so anything else would let the two tiles disagree.
+   * with the unit off, so anything else would let the two surfaces disagree.
    */
   #configureFan(): void {
     const service = this.#fan;

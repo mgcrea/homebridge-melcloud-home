@@ -33,13 +33,13 @@ Homebridge plugin for Mitsubishi Electric air conditioners on **MELCloud Home**
 
 - Each air-to-air unit appears as a HomeKit **Heater Cooler**: power, heat/cool/auto,
   target temperature, fan speed and swing.
-- A companion **Fan** tile carrying fan speed, automatic fan speed and swing. The Home app
-  does not render these on a Heater Cooler tile, so this is the only way to reach airflow
-  natively rather than through Eve or another third-party app.
+- **Fan speed, automatic fan speed and swing** included natively. The Home app does not
+  render these on a Heater Cooler, so they ride on a companion Fan service — which the Home
+  app folds into the same control, so a unit stays a single accessory.
 - **Dry** and **fan-only** mode available as opt-in switches, since HomeKit has no native
-  equivalent. Off by default — every service gets its own tile.
-- Optional per-unit **temperature sensor** (off by default — the climate tile already reports
-  room temperature), plus fault and connectivity status.
+  equivalent. Off by default: the modes are already reachable from the mode picker.
+- Optional per-unit **temperature sensor** (off by default — the climate control already
+  reports room temperature), carrying fault and connectivity status.
 - **Real-time updates** over the platform's push feed, so changes made from a physical
   remote or the official app show up within seconds rather than at the next poll.
 - Characteristic writes are **merged into a single request**, which keeps scenes fast and
@@ -81,11 +81,11 @@ Add a platform block to `config.json`, or use the Homebridge UI form:
 | `password` | — | MELCloud Home account password. Required. |
 | `pollInterval` | `60` | Seconds between polls. Clamped to a 30 second minimum. |
 | `useWebSocket` | `true` | Subscribe to real-time push updates. |
-| `exposeFanService` | `true` | Fan tile per unit with fan speed, auto and swing. The only native way to reach them. |
-| `exposeTemperatureSensors` | `false` | Separate temperature sensor per unit. Duplicates the reading already on the climate tile. |
-| `exposeDrySwitch` | `false` | Switch for dry mode, on units that support it. Extra tile. |
-| `exposeFanSwitch` | `false` | Switch for fan-only mode. Extra tile. |
-| `exposeAutoFanSwitch` | `false` | Switch for automatic fan speed. Extra tile. |
+| `exposeFanService` | `true` | Fan speed, auto and swing. The only native way to reach them; folds into the same control. |
+| `exposeTemperatureSensors` | `false` | Separate temperature sensor per unit. Duplicates the climate reading, but carries fault/connectivity status. |
+| `exposeDrySwitch` | `false` | Switch for dry mode, on units that support it. Extra control. |
+| `exposeFanSwitch` | `false` | Switch for fan-only mode. Extra control. |
+| `exposeAutoFanSwitch` | `false` | Switch for automatic fan speed. Redundant when `exposeFanService` is on. |
 | `exposeEnergy` | `false` | Reserved for a future release. Enabling it currently does nothing. |
 | `debug` | `false` | Verbose, redacted request logging. |
 
@@ -111,7 +111,7 @@ Tokens are refreshed automatically about a minute before they expire.
 | Swing mode | vertical vane `Swing` |
 | Status fault / active | `IsInError` / `isConnected` — on the temperature sensor only, since HeaterCooler does not carry these characteristics |
 
-Dry and Fan report as *Cool* on the main tile — they never heat — with the dedicated
+Dry and Fan report as *Cool* on the main control — they never heat — with the dedicated
 switches showing the real mode.
 
 ## Verifying your account
