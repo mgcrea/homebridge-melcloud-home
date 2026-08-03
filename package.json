@@ -1,7 +1,7 @@
 {
   "name": "@mgcrea/homebridge-melcloud-home",
   "displayName": "MELCloud Home",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "Homebridge plugin for Mitsubishi Electric air conditioners on the MELCloud Home platform",
   "author": "Olivier Louvignes <olivier@mgcrea.io>",
   "repository": {
