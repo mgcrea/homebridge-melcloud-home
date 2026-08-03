@@ -11,9 +11,11 @@ Homebridge plugin for Mitsubishi Electric air conditioners on **MELCloud Home**
 
 - Each air-to-air unit appears as a HomeKit **Heater Cooler**: power, heat/cool/auto,
   target temperature, fan speed and swing.
-- **Dry**, **Fan** and **automatic fan speed** available as opt-in switches, since HomeKit
-  has no native equivalent for any of them. Off by default — HomeKit gives every service
-  its own tile, so enabling all three turns one air conditioner into four tiles.
+- A companion **Fan** tile carrying fan speed, automatic fan speed and swing. The Home app
+  does not render these on a Heater Cooler tile, so this is the only way to reach airflow
+  natively rather than through Eve or another third-party app.
+- **Dry** and **fan-only** mode available as opt-in switches, since HomeKit has no native
+  equivalent. Off by default — every service gets its own tile.
 - Optional per-unit **temperature sensor** (off by default — the climate tile already reports
   room temperature), plus fault and connectivity status.
 - **Real-time updates** over the platform's push feed, so changes made from a physical
@@ -57,6 +59,7 @@ Add a platform block to `config.json`, or use the Homebridge UI form:
 | `password` | — | MELCloud Home account password. Required. |
 | `pollInterval` | `60` | Seconds between polls. Clamped to a 30 second minimum. |
 | `useWebSocket` | `true` | Subscribe to real-time push updates. |
+| `exposeFanService` | `true` | Fan tile per unit with fan speed, auto and swing. The only native way to reach them. |
 | `exposeTemperatureSensors` | `false` | Separate temperature sensor per unit. Duplicates the reading already on the climate tile. |
 | `exposeDrySwitch` | `false` | Switch for dry mode, on units that support it. Extra tile. |
 | `exposeFanSwitch` | `false` | Switch for fan-only mode. Extra tile. |
@@ -81,6 +84,8 @@ Tokens are refreshed automatically about a minute before they expire.
 | Current temperature | `RoomTemperature` |
 | Heating / cooling threshold | `SetTemperature` (one setpoint, shown on both) |
 | Rotation speed | `SetFanSpeed`, spaced across the unit's speed count |
+| Fan AUTO toggle | `SetFanSpeed` of `Auto` |
+| Current fan state | `ActualFanSpeed` — `Off` or standby reads as idle |
 | Swing mode | vertical vane `Swing` |
 | Status fault / active | `IsInError` / `isConnected` — on the temperature sensor only, since HeaterCooler does not carry these characteristics |
 

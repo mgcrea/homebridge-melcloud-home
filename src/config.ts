@@ -11,6 +11,7 @@ export type MelCloudHomeConfig = {
   pollIntervalMs: number;
   writeDebounceMs: number;
   useWebSocket: boolean;
+  exposeFanService: boolean;
   exposeTemperatureSensors: boolean;
   exposeDrySwitch: boolean;
   exposeFanSwitch: boolean;
@@ -54,6 +55,10 @@ export const parseConfig = (config: PlatformConfig): MelCloudHomeConfig => {
     pollIntervalMs,
     writeDebounceMs: DEFAULT_WRITE_DEBOUNCE_MS,
     useWebSocket: boolean(config["useWebSocket"], true),
+    // The Home app does not render fan speed or swing on a Heater Cooler tile,
+    // so a Fan service is the only way to reach them natively. On by default:
+    // without it, airflow control is unreachable outside third-party apps.
+    exposeFanService: boolean(config["exposeFanService"], true),
     // The Heater Cooler tile already reports room temperature, so a separate
     // sensor is a duplicate reading on its own tile. Opt in when a distinct
     // sensor is wanted for automations or history.

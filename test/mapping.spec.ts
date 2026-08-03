@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { capabilitiesSchema, type Capabilities, type UnitState } from "../src/api/types.js";
 import {
+  CurrentFanState,
   CurrentState,
   SwingMode,
+  TargetFanState,
   TargetState,
   fanSpeedStep,
   fanSpeedToPercent,
@@ -12,7 +14,9 @@ import {
   quantizeTemperature,
   temperatureRangeFor,
   temperatureStep,
+  toCurrentFanState,
   toCurrentState,
+  toTargetFanState,
   toTargetState,
 } from "../src/util/mapping.js";
 
@@ -153,5 +157,29 @@ describe("swing", () => {
     expect(isSwinging(state({ vaneVerticalDirection: "Swing" }))).toBe(SwingMode.ENABLED);
     expect(isSwinging(state({ vaneHorizontalDirection: "Swing" }))).toBe(SwingMode.ENABLED);
     expect(isSwinging(state())).toBe(SwingMode.DISABLED);
+  });
+});
+
+describe("fan state", () => {
+  it("is inactive only when the unit is off", () => {
+    expect(toCurrentFanState(state({ power: false }))).toBe(CurrentFanState.INACTIVE);
+  });
+
+  it("is idle when the unit is on but has stopped moving air", () => {
+    // Reaching the setpoint parks the fan; the unit is still on, so this is
+    // IDLE rather than INACTIVE.
+    expect(toCurrentFanState(state({ actualFanSpeed: "Off" }))).toBe(CurrentFanState.IDLE);
+    expect(toCurrentFanState(state({ inStandbyMode: true }))).toBe(CurrentFanState.IDLE);
+    expect(toCurrentFanState(state({ actualFanSpeed: undefined }))).toBe(CurrentFanState.IDLE);
+  });
+
+  it("is blowing when the unit reports a real speed", () => {
+    expect(toCurrentFanState(state({ actualFanSpeed: "Three" }))).toBe(CurrentFanState.BLOWING_AIR);
+  });
+
+  it("maps automatic fan speed onto the AUTO toggle", () => {
+    expect(toTargetFanState("Auto")).toBe(TargetFanState.AUTO);
+    expect(toTargetFanState("Three")).toBe(TargetFanState.MANUAL);
+    expect(toTargetFanState(undefined)).toBe(TargetFanState.MANUAL);
   });
 });

@@ -1,5 +1,5 @@
 import type { CharacteristicValue, PlatformAccessory, Service } from "homebridge";
-import type { OperationMode } from "../api/const.js";
+import type { FanSpeed, OperationMode } from "../api/const.js";
 import type { AtaControlPatch, AtaUnit, Building, UnitState } from "../api/types.js";
 import { parseUnitState } from "../api/types.js";
 import type { MelCloudHomePlatform } from "../platform.js";
@@ -8,6 +8,7 @@ import { WriteCoalescer } from "../util/coalesce.js";
 import {
   CurrentState,
   SwingMode,
+  TargetFanState,
   TargetState,
   fanSpeedStep,
   fanSpeedToPercent,
@@ -17,7 +18,9 @@ import {
   quantizeTemperature,
   temperatureRangeFor,
   temperatureStep,
+  toCurrentFanState,
   toCurrentState,
+  toTargetFanState,
   toTargetState,
 } from "../util/mapping.js";
 
@@ -30,6 +33,7 @@ import {
  */
 export class AtaAccessory {
   readonly #heaterCooler: Service;
+  readonly #fan: Service | undefined;
   readonly #temperatureSensor: Service | undefined;
   readonly #drySwitch: Service | undefined;
   readonly #fanSwitch: Service | undefined;
@@ -76,6 +80,13 @@ export class AtaAccessory {
     // The unit is a thermostat first; any extra services are accessories to it.
     this.#heaterCooler.setPrimaryService(true);
 
+    this.#fan = this.#optionalService(
+      platform.options.exposeFanService,
+      Service.Fanv2,
+      `${unit.givenDisplayName} Fan`,
+      "airflow",
+    );
+
     this.#temperatureSensor = this.#optionalService(
       platform.options.exposeTemperatureSensors,
       Service.TemperatureSensor,
@@ -102,6 +113,7 @@ export class AtaAccessory {
     );
 
     this.#configureHeaterCooler();
+    this.#configureFan();
     this.#configureExtras();
     this.#pushToHomeKit();
   }
@@ -113,7 +125,7 @@ export class AtaAccessory {
   /** Add or remove an optional service depending on config and capabilities. */
   #optionalService(
     enabled: boolean,
-    type: typeof Service.Switch | typeof Service.TemperatureSensor,
+    type: typeof Service.Switch | typeof Service.TemperatureSensor | typeof Service.Fanv2,
     name: string,
     subtype: string,
   ): Service | undefined {
@@ -218,7 +230,7 @@ export class AtaAccessory {
           }
           this.#state = { ...this.#state, setFanSpeed: speed };
           this.#writer.submit({ setFanSpeed: speed });
-          this.#autoFanSwitch?.updateCharacteristic(Characteristic.On, false);
+          this.#syncFanSpeed();
         });
     }
 
@@ -236,6 +248,117 @@ export class AtaAccessory {
 
     // StatusFault and StatusActive are not part of HeaterCooler in HAP, so they
     // are reported on the temperature sensor instead, where they are valid.
+  }
+
+  /**
+   * Airflow, as a Fan service.
+   *
+   * The Home app does not surface RotationSpeed or SwingMode on a HeaterCooler
+   * tile, so fan speed, automatic fan speed and swing are unreachable there.
+   * Fanv2 is rendered as a real fan with a speed slider and an AUTO toggle,
+   * which is the only native way to drive any of it.
+   *
+   * Active mirrors unit power rather than a fan-only mode: the fan cannot run
+   * with the unit off, so anything else would let the two tiles disagree.
+   */
+  #configureFan(): void {
+    const service = this.#fan;
+    if (!service) {
+      return;
+    }
+    const { Characteristic } = this.platform;
+    const capabilities = this.#unit.capabilities;
+
+    service
+      .getCharacteristic(Characteristic.Active)
+      .onGet(() => (this.#state.power ? 1 : 0))
+      .onSet((value) => {
+        const power = value === 1;
+        this.#state = { ...this.#state, power };
+        // Same pairing as the HeaterCooler: a bare power-on can read as a mode
+        // conflict on a multi-split outdoor unit.
+        this.#writer.submit({ power, operationMode: this.#state.operationMode ?? "Automatic" });
+        this.#heaterCooler.updateCharacteristic(Characteristic.Active, power ? 1 : 0);
+      });
+
+    service
+      .getCharacteristic(Characteristic.CurrentFanState)
+      .onGet(() => toCurrentFanState(this.#state));
+
+    if (capabilities.hasAutomaticFanSpeed) {
+      service
+        .getCharacteristic(Characteristic.TargetFanState)
+        .onGet(() => toTargetFanState(this.#state.setFanSpeed))
+        .onSet((value) => {
+          // Leaving AUTO has to name a real speed, and the remembered one is
+          // "Auto" by definition — fall back to the slowest.
+          const current = this.#state.setFanSpeed;
+          const next: FanSpeed =
+            value === TargetFanState.AUTO
+              ? "Auto"
+              : current && current !== "Auto"
+                ? current
+                : "One";
+          this.#state = { ...this.#state, setFanSpeed: next };
+          this.#writer.submit({ setFanSpeed: next });
+          this.#syncFanSpeed();
+        });
+    }
+
+    if (capabilities.numberOfFanSpeeds > 0) {
+      service
+        .getCharacteristic(Characteristic.RotationSpeed)
+        .setProps({
+          minValue: 0,
+          maxValue: 100,
+          minStep: fanSpeedStep(capabilities.numberOfFanSpeeds),
+        })
+        .onGet(() => fanSpeedToPercent(this.#state.setFanSpeed, capabilities.numberOfFanSpeeds))
+        .onSet((value) => {
+          const speed = percentToFanSpeed(Number(value), capabilities.numberOfFanSpeeds);
+          if (!speed) {
+            return;
+          }
+          this.#state = { ...this.#state, setFanSpeed: speed };
+          this.#writer.submit({ setFanSpeed: speed });
+          this.#syncFanSpeed();
+        });
+    }
+
+    if (capabilities.hasSwing || capabilities.hasAirDirection) {
+      service
+        .getCharacteristic(Characteristic.SwingMode)
+        .onGet(() => isSwinging(this.#state))
+        .onSet((value) => {
+          const vane = value === SwingMode.ENABLED ? "Swing" : "Auto";
+          this.#state = { ...this.#state, vaneVerticalDirection: vane };
+          this.#writer.submit({ vaneVerticalDirection: vane });
+          this.#heaterCooler.updateCharacteristic(
+            Characteristic.SwingMode,
+            isSwinging(this.#state),
+          );
+        });
+    }
+  }
+
+  /** Keep every surface that shows fan speed agreeing with the current state. */
+  #syncFanSpeed(): void {
+    const { Characteristic } = this.platform;
+    const steps = this.#unit.capabilities.numberOfFanSpeeds;
+    const percent = fanSpeedToPercent(this.#state.setFanSpeed, steps);
+    const auto = this.#state.setFanSpeed === "Auto";
+
+    if (steps > 0) {
+      this.#heaterCooler.updateCharacteristic(Characteristic.RotationSpeed, percent);
+      this.#fan?.updateCharacteristic(Characteristic.RotationSpeed, percent);
+    }
+    this.#autoFanSwitch?.updateCharacteristic(Characteristic.On, auto);
+    if (this.#unit.capabilities.hasAutomaticFanSpeed) {
+      this.#fan?.updateCharacteristic(
+        Characteristic.TargetFanState,
+        toTargetFanState(this.#state.setFanSpeed),
+      );
+    }
   }
 
   /** Bound the setpoint characteristics to what the current mode allows. */
@@ -381,6 +504,22 @@ export class AtaAccessory {
     }
     if (capabilities.hasSwing || capabilities.hasAirDirection) {
       service.updateCharacteristic(Characteristic.SwingMode, isSwinging(this.#state));
+      this.#fan?.updateCharacteristic(Characteristic.SwingMode, isSwinging(this.#state));
+    }
+
+    this.#fan?.updateCharacteristic(Characteristic.Active, this.#state.power ? 1 : 0);
+    this.#fan?.updateCharacteristic(Characteristic.CurrentFanState, toCurrentFanState(this.#state));
+    if (capabilities.hasAutomaticFanSpeed) {
+      this.#fan?.updateCharacteristic(
+        Characteristic.TargetFanState,
+        toTargetFanState(this.#state.setFanSpeed),
+      );
+    }
+    if (capabilities.numberOfFanSpeeds > 0) {
+      this.#fan?.updateCharacteristic(
+        Characteristic.RotationSpeed,
+        fanSpeedToPercent(this.#state.setFanSpeed, capabilities.numberOfFanSpeeds),
+      );
     }
 
     this.#autoFanSwitch?.updateCharacteristic(

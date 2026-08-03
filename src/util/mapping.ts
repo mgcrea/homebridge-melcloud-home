@@ -138,6 +138,34 @@ export const percentToFanSpeed = (percent: number, steps: number): FanSpeed | un
 
 export const fanSpeedStep = (steps: number): number => (steps > 0 ? 100 / steps : 100);
 
+/** `Characteristic.CurrentFanState` */
+export const CurrentFanState = { INACTIVE: 0, IDLE: 1, BLOWING_AIR: 2 } as const;
+
+/** `Characteristic.TargetFanState` */
+export const TargetFanState = { MANUAL: 0, AUTO: 1 } as const;
+
+/**
+ * What the fan is actually doing. The unit reports `Off` for `ActualFanSpeed`
+ * once it reaches the setpoint and stops, which is IDLE rather than INACTIVE —
+ * the unit is still on, it just is not moving air.
+ */
+export const toCurrentFanState = (state: UnitState): number => {
+  if (!state.power) {
+    return CurrentFanState.INACTIVE;
+  }
+  if (state.inStandbyMode || state.actualFanSpeed === undefined || state.actualFanSpeed === "Off") {
+    return CurrentFanState.IDLE;
+  }
+  return CurrentFanState.BLOWING_AIR;
+};
+
+/**
+ * Automatic fan speed maps onto `TargetFanState`, which is what the Home app
+ * renders as the AUTO/MANUAL toggle on a fan tile.
+ */
+export const toTargetFanState = (speed: FanSpeed | undefined): number =>
+  speed === "Auto" ? TargetFanState.AUTO : TargetFanState.MANUAL;
+
 // ---------------------------------------------------------------------------
 // Swing
 // ---------------------------------------------------------------------------

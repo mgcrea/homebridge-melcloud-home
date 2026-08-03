@@ -40,6 +40,12 @@
         "default": true,
         "description": "Subscribe to the platform's push feed so changes made from a remote or the MELCloud Home app appear within seconds. Polling continues as a fallback."
       },
+      "exposeFanService": {
+        "title": "Expose airflow as a Fan accessory",
+        "type": "boolean",
+        "default": true,
+        "description": "Adds a Fan tile per unit carrying fan speed, automatic fan speed and swing. The Home app does not render these on the climate tile, so without this they cannot be reached natively. Turning it on makes the separate automatic-fan-speed switch redundant."
+      },
       "exposeTemperatureSensors": {
         "title": "Expose temperature sensors",
         "type": "boolean",

@@ -16,6 +16,8 @@ describe("parseConfig", () => {
       email: "user@example.com",
       pollIntervalMs: 60_000,
       useWebSocket: true,
+      // On by default: the Home app cannot reach fan speed or swing otherwise.
+      exposeFanService: true,
       // Opt-in: each of these is an extra HomeKit tile per unit.
       exposeTemperatureSensors: false,
       exposeDrySwitch: false,
