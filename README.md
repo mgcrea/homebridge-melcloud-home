@@ -14,7 +14,8 @@ Homebridge plugin for Mitsubishi Electric air conditioners on **MELCloud Home**
 - **Dry**, **Fan** and **automatic fan speed** available as opt-in switches, since HomeKit
   has no native equivalent for any of them. Off by default — HomeKit gives every service
   its own tile, so enabling all three turns one air conditioner into four tiles.
-- Optional per-unit **temperature sensor**, plus fault and connectivity status.
+- Optional per-unit **temperature sensor** (off by default — the climate tile already reports
+  room temperature), plus fault and connectivity status.
 - **Real-time updates** over the platform's push feed, so changes made from a physical
   remote or the official app show up within seconds rather than at the next poll.
 - Characteristic writes are **merged into a single request**, which keeps scenes fast and
@@ -56,7 +57,7 @@ Add a platform block to `config.json`, or use the Homebridge UI form:
 | `password` | — | MELCloud Home account password. Required. |
 | `pollInterval` | `60` | Seconds between polls. Clamped to a 30 second minimum. |
 | `useWebSocket` | `true` | Subscribe to real-time push updates. |
-| `exposeTemperatureSensors` | `true` | Add a standalone temperature sensor per unit. |
+| `exposeTemperatureSensors` | `false` | Separate temperature sensor per unit. Duplicates the reading already on the climate tile. |
 | `exposeDrySwitch` | `false` | Switch for dry mode, on units that support it. Extra tile. |
 | `exposeFanSwitch` | `false` | Switch for fan-only mode. Extra tile. |
 | `exposeAutoFanSwitch` | `false` | Switch for automatic fan speed. Extra tile. |
@@ -81,7 +82,7 @@ Tokens are refreshed automatically about a minute before they expire.
 | Heating / cooling threshold | `SetTemperature` (one setpoint, shown on both) |
 | Rotation speed | `SetFanSpeed`, spaced across the unit's speed count |
 | Swing mode | vertical vane `Swing` |
-| Status fault / active | `IsInError` / `isConnected` |
+| Status fault / active | `IsInError` / `isConnected` — on the temperature sensor only, since HeaterCooler does not carry these characteristics |
 
 Dry and Fan report as *Cool* on the main tile — they never heat — with the dedicated
 switches showing the real mode.

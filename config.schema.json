@@ -43,8 +43,8 @@
       "exposeTemperatureSensors": {
         "title": "Expose temperature sensors",
         "type": "boolean",
-        "default": true,
-        "description": "Add a separate temperature sensor per unit, usable in automations."
+        "default": false,
+        "description": "Add a separate temperature sensor per unit. The Heater Cooler tile already shows room temperature, so this is a duplicate reading on its own tile — enable it only if you want a distinct sensor for automations or history."
       },
       "exposeDrySwitch": {
         "title": "Expose Dry mode switch",

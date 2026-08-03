@@ -54,7 +54,10 @@ export const parseConfig = (config: PlatformConfig): MelCloudHomeConfig => {
     pollIntervalMs,
     writeDebounceMs: DEFAULT_WRITE_DEBOUNCE_MS,
     useWebSocket: boolean(config["useWebSocket"], true),
-    exposeTemperatureSensors: boolean(config["exposeTemperatureSensors"], true),
+    // The Heater Cooler tile already reports room temperature, so a separate
+    // sensor is a duplicate reading on its own tile. Opt in when a distinct
+    // sensor is wanted for automations or history.
+    exposeTemperatureSensors: boolean(config["exposeTemperatureSensors"], false),
     // HomeKit gives every service of a bridged accessory its own tile, so these
     // are opt-in: three extra toggles per unit buries the thermostat itself.
     exposeDrySwitch: boolean(config["exposeDrySwitch"], false),

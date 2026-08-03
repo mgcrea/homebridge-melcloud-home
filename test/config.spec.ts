@@ -16,8 +16,8 @@ describe("parseConfig", () => {
       email: "user@example.com",
       pollIntervalMs: 60_000,
       useWebSocket: true,
-      exposeTemperatureSensors: true,
       // Opt-in: each of these is an extra HomeKit tile per unit.
+      exposeTemperatureSensors: false,
       exposeDrySwitch: false,
       exposeFanSwitch: false,
       exposeAutoFanSwitch: false,
