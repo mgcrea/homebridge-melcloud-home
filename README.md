@@ -1,4 +1,26 @@
+<!-- markdownlint-disable no-inline-html -->
+
 # @mgcrea/homebridge-melcloud-home
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/@mgcrea/homebridge-melcloud-home">
+    <img src="https://img.shields.io/npm/v/@mgcrea/homebridge-melcloud-home.svg?style=for-the-badge" alt="npm version" />
+  </a>
+  <a href="https://www.npmjs.com/package/@mgcrea/homebridge-melcloud-home">
+    <img src="https://img.shields.io/npm/dt/@mgcrea/homebridge-melcloud-home.svg?style=for-the-badge" alt="npm total downloads" />
+  </a>
+  <a href="https://www.npmjs.com/package/@mgcrea/homebridge-melcloud-home">
+    <img src="https://img.shields.io/npm/dm/@mgcrea/homebridge-melcloud-home.svg?style=for-the-badge" alt="npm monthly downloads" />
+  </a>
+  <a href="https://www.npmjs.com/package/@mgcrea/homebridge-melcloud-home">
+    <img src="https://img.shields.io/npm/l/@mgcrea/homebridge-melcloud-home.svg?style=for-the-badge" alt="npm license" />
+  </a>
+  <a href="https://github.com/mgcrea/homebridge-melcloud-home/actions/workflows/ci.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/mgcrea/homebridge-melcloud-home/ci.yml?style=for-the-badge" alt="github ci workflow" />
+  </a>
+</p>
+
+---
 
 Homebridge plugin for Mitsubishi Electric air conditioners on **MELCloud Home**
 (`melcloudhome.com`) — the platform used by 4th-generation Wi-Fi adapters.
