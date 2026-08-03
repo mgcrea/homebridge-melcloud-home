@@ -53,9 +53,6 @@
     "node": "^22 || ^24",
     "homebridge": "^2.0.0"
   },
-  "peerDependencies": {
-    "homebridge": "^2.0.0"
-  },
   "dependencies": {
     "ws": "^8.18.3",
     "zod": "^4.1.12"
