@@ -23,7 +23,7 @@ Homebridge plugin for Mitsubishi Electric air conditioners on **MELCloud Home**
 
 ## Requirements
 
-- Node.js 22 or 24
+- Node.js 22, 24 or 26
 - Homebridge 2.x
 
 ## Install
