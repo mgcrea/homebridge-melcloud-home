@@ -33,6 +33,9 @@ export class MelCloudHomePlatform implements DynamicPlatformPlugin {
   #socket: MelCloudHomeWebSocket | undefined;
   #pollTimer: NodeJS.Timeout | undefined;
   #shuttingDown = false;
+  /** The discovery run in flight, and whether another was asked for meanwhile. */
+  #discovering: Promise<void> | undefined;
+  #rediscover = false;
 
   constructor(
     readonly log: Logging,
@@ -158,8 +161,44 @@ export class MelCloudHomePlatform implements DynamicPlatformPlugin {
     });
   }
 
-  /** Reconcile the account against the accessories we have registered. */
+  /**
+   * Reconcile the account against the accessories we have registered.
+   *
+   * Serialised, because the poll tick and every WebSocket frame both land here
+   * and the first thing the run does is await the account context. Overlapping
+   * runs cannot double-register — everything after that await is synchronous,
+   * so they resume one after the other — but they each sweep against their own
+   * snapshot, and whichever resumes last wins. A read taken before a unit was
+   * added therefore unregisters the accessory the newer read just registered,
+   * and the unit flaps out of HomeKit until a later pass puts it back. Frames
+   * arrive in bursts, so the overlap is not hypothetical.
+   *
+   * A request that arrives mid-flight cannot simply join the run in progress:
+   * that run may have read the account before the change it is reporting. It
+   * queues exactly one more pass instead — enough to see the change, without
+   * piling up a pass per frame during a burst.
+   */
   async #discover(): Promise<void> {
+    if (this.#discovering) {
+      this.#rediscover = true;
+      return this.#discovering;
+    }
+    const run = (async () => {
+      do {
+        this.#rediscover = false;
+        await this.#runDiscovery();
+      } while (this.#rediscover);
+    })();
+    this.#discovering = run;
+    try {
+      await run;
+    } finally {
+      this.#discovering = undefined;
+      this.#rediscover = false;
+    }
+  }
+
+  async #runDiscovery(): Promise<void> {
     const context = await this.client.getContext();
     const units = collectAtaUnits(context);
 
@@ -180,6 +219,14 @@ export class MelCloudHomePlatform implements DynamicPlatformPlugin {
         this.log.info(`Removing stale accessory: ${accessory.displayName}`);
         this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
         this.#cached.delete(uuid);
+        // Drop the live wrapper too. `#register` checks `#accessories` first,
+        // so leaving it behind would make a unit that comes back push values
+        // into a handler bound to an accessory Homebridge no longer knows
+        // about — and never register it again, so it stays invisible in
+        // HomeKit until a restart. Its debounced writer would also keep its
+        // timer alive for as long as the bridge runs.
+        this.#accessories.get(uuid)?.dispose();
+        this.#accessories.delete(uuid);
       }
     }
   }
