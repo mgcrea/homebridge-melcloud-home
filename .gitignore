@@ -16,3 +16,6 @@ coverage/
 # Local Homebridge instance for development — config.json holds the account
 # password in plaintext, and persist/ holds the paired HomeKit keys.
 .homebridge/
+
+# Tarballs from `npm pack`; never committed.
+*.tgz
