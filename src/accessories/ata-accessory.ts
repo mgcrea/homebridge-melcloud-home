@@ -45,6 +45,25 @@ export class AtaAccessory {
   readonly #autoFanSwitch: Service | undefined;
   readonly #writer: WriteCoalescer;
 
+  /**
+   * Wrap a read so it refuses while MELCloud itself is unreachable.
+   *
+   * With the cloud down we have no idea what the unit is doing, and answering
+   * with the values it last reported is a confident wrong answer about the
+   * house. HomeKit marks the accessory unresponsive, which is the honest
+   * outcome. Pushed updates are unaffected.
+   */
+  #guard<T>(read: () => T): () => T {
+    return () => {
+      if (this.platform.unreachable) {
+        // -70402 is `HAPStatus.SERVICE_COMMUNICATION_FAILURE`, spelled
+        // numerically because the enum is an ambient const enum.
+        throw new this.platform.HapStatusError(-70402);
+      }
+      return read();
+    };
+  }
+
   #unit: AtaUnit;
   #state: UnitState;
 
@@ -57,6 +76,16 @@ export class AtaAccessory {
     const { Service, Characteristic } = platform;
     this.#unit = unit;
     this.#state = parseUnitState(unit);
+
+    // Say so at startup too, not only on a change: a unit that was already
+    // disconnected when the bridge started would otherwise never be mentioned,
+    // which is the case hardest to diagnose from outside.
+    if (!unit.isConnected) {
+      platform.log.warn(
+        `${unit.givenDisplayName} is reported as disconnected by MELCloud, and will show as ` +
+          "not responding in the Home app until it checks in.",
+      );
+    }
 
     this.#writer = new WriteCoalescer(
       platform.options.writeDebounceMs,
@@ -170,7 +199,7 @@ export class AtaAccessory {
 
     service
       .getCharacteristic(Characteristic.Active)
-      .onGet(() => (this.#state.power ? 1 : 0))
+      .onGet(this.#guard(() => (this.#state.power ? 1 : 0)))
       .onSet((value) => {
         const power = value === 1;
         this.#state = { ...this.#state, power };
@@ -553,8 +582,26 @@ export class AtaAccessory {
 
   /** Apply fresh server state from a poll or a real-time delta. */
   update(unit: AtaUnit): void {
+    const wasConnected = this.#unit.isConnected;
     this.#unit = unit;
     this.#state = parseUnitState(unit);
+
+    // MELCloud reporting a unit as disconnected is the single most confusing
+    // state to debug from outside: it drives StatusActive, which makes the Home
+    // app show the accessory as not responding, while pushed values carry on
+    // updating normally. Nothing used to say so anywhere.
+    if (wasConnected !== unit.isConnected) {
+      if (unit.isConnected) {
+        this.platform.log.info(`${this.name} is connected to MELCloud again.`);
+      } else {
+        this.platform.log.warn(
+          `${this.name} is reported as disconnected by MELCloud. It will show as not ` +
+            "responding in the Home app until the unit checks in again, even though other " +
+            "values may keep updating.",
+        );
+      }
+    }
+
     this.#pushToHomeKit();
   }
 

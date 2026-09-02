@@ -8,6 +8,7 @@ import type {
   Service,
 } from "homebridge";
 import { MelCloudHomeAuth, type AuthLogger } from "./api/auth.js";
+import { UNREACHABLE_AFTER_FAILURES } from "./api/const.js";
 import { MelCloudHomeClient } from "./api/client.js";
 import { RequestPacer } from "./api/pacer.js";
 import { FileTokenStore } from "./api/token-store.js";
@@ -24,6 +25,8 @@ import { PLATFORM_NAME, PLUGIN_NAME } from "./settings.js";
 export class MelCloudHomePlatform implements DynamicPlatformPlugin {
   readonly Service: typeof Service;
   readonly Characteristic: typeof Characteristic;
+  /** Exposed so accessories can refuse a read without reaching for the private API. */
+  readonly HapStatusError: API["hap"]["HapStatusError"];
 
   readonly #config: MelCloudHomeConfig | undefined;
   readonly #cached = new Map<string, PlatformAccessory>();
@@ -33,6 +36,8 @@ export class MelCloudHomePlatform implements DynamicPlatformPlugin {
   #socket: MelCloudHomeWebSocket | undefined;
   #pollTimer: NodeJS.Timeout | undefined;
   #shuttingDown = false;
+  /** Consecutive failed polls; drives `unreachable`. */
+  #consecutiveFailures = 0;
   /** The discovery run in flight, and whether another was asked for meanwhile. */
   #discovering: Promise<void> | undefined;
   #rediscover = false;
@@ -44,6 +49,7 @@ export class MelCloudHomePlatform implements DynamicPlatformPlugin {
   ) {
     this.Service = api.hap.Service;
     this.Characteristic = api.hap.Characteristic;
+    this.HapStatusError = api.hap.HapStatusError;
 
     try {
       this.#config = parseConfig(config);
@@ -254,6 +260,19 @@ export class MelCloudHomePlatform implements DynamicPlatformPlugin {
     this.#cached.set(uuid, accessory);
   }
 
+  /**
+   * Whether the last few polls have all failed.
+   *
+   * Accessories refuse to answer reads while this is true, so HomeKit shows
+   * "No Response" rather than the values MELCloud last happened to tell us. A
+   * thermostat confidently reporting 21° from an hour ago is worse than one
+   * that visibly cannot be reached: the first is a wrong answer about the
+   * house, the second is an absence of one.
+   */
+  get unreachable(): boolean {
+    return this.#consecutiveFailures >= UNREACHABLE_AFTER_FAILURES;
+  }
+
   /** Poll tick: re-read everything and push fresh values into HomeKit. */
   async #refresh(): Promise<void> {
     if (this.#shuttingDown) {
@@ -262,8 +281,43 @@ export class MelCloudHomePlatform implements DynamicPlatformPlugin {
     try {
       // Discovery is idempotent and also picks up units added in the app.
       await this.#discover();
+      this.#onPollSucceeded();
     } catch (error) {
-      this.log.debug(`Refresh failed: ${describe(error)}`);
+      this.#onPollFailed(error);
+    }
+  }
+
+  #onPollSucceeded(): void {
+    const wasUnreachable = this.unreachable;
+    this.#consecutiveFailures = 0;
+
+    if (wasUnreachable) {
+      this.log.info("MELCloud is answering again; units are back.");
+    }
+  }
+
+  /**
+   * Report a failed poll — once, not on every tick.
+   *
+   * This used to log at debug, which is off by default, so an outage upstream
+   * looked exactly like a healthy quiet system: the plugin polled, failed, and
+   * said nothing for hours. Announcing the first failure and the recovery, and
+   * staying quiet in between, makes an outage visible without turning a long
+   * one into thousands of identical lines.
+   */
+  #onPollFailed(error: unknown): void {
+    this.#consecutiveFailures += 1;
+
+    if (this.#consecutiveFailures === 1) {
+      this.log.warn(`Could not reach MELCloud: ${describe(error)}`);
+    } else if (this.#consecutiveFailures === UNREACHABLE_AFTER_FAILURES) {
+      this.log.warn(
+        `MELCloud has not answered ${UNREACHABLE_AFTER_FAILURES} polls in a row. ` +
+          "Units will show as unresponsive in the Home app until it does. " +
+          "If the MELCloud app is also failing, the outage is upstream and there is nothing to fix here.",
+      );
+    } else {
+      this.log.debug(`Refresh failed (${this.#consecutiveFailures} in a row): ${describe(error)}`);
     }
   }
 

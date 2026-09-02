@@ -122,3 +122,12 @@ export const MIN_POLL_INTERVAL_MS = 30_000;
 export const DEFAULT_WRITE_DEBOUNCE_MS = 400;
 
 export const REQUEST_TIMEOUT_MS = 30_000;
+
+/**
+ * Consecutive failed polls before units are reported unresponsive.
+ *
+ * Three rather than one: a single failed poll is routine — a dropped request,
+ * a brief upstream hiccup — and flapping the whole house to "No Response" over
+ * one is worse than being a poll or two late to say so.
+ */
+export const UNREACHABLE_AFTER_FAILURES = 3;
